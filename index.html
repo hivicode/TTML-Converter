@@ -31,15 +31,15 @@
     <label id="editorLabel" for="editor" style="margin-top:12px;">Editor</label>
     <textarea id="editor" placeholder="Paste Apple Music JSON or TTML here..."></textarea>
     <div class="row" style="margin-top:8px; align-items:center;">
+      <label id="custLabel" style="margin:0;">Custom filename (.ttml):</label>
+      <input type="text" id="customName" placeholder="leave empty for auto" style="flex:1; min-width:240px;" />
+    </div>
+    <div class="row" style="margin-top:8px; align-items:center;">
       <button id="extract" class="primary">Convert & Download .ttml</button>
       <button id="clear">Clear</button>
       <label style="display:flex; align-items:center; gap:6px; margin-left:auto;">
         <input type="checkbox" id="beautify" checked /> <span id="beautifyLabel">Beautify</span>
       </label>
-    </div>
-    <div class="row" style="margin-top:8px; align-items:center;">
-      <label id="custLabel" style="margin:0;">Custom filename (.ttml):</label>
-      <input type="text" id="customName" placeholder="leave empty for auto" style="flex:1; min-width:240px;" />
     </div>
     <div id="status" class="hint" style="margin-top:8px;"></div>
   </section>
