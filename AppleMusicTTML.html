@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apple Music TTML Tool - NewSync</title>
+  <link rel="stylesheet" href="AppleMusicTTML.css">
+</head>
+<body>
+  <div class="toolbar">
+    <h1 id="title">Apple Music TTML Tool - NewSync</h1>
+    <div class="toggle-group"><span id="langLabel" class="hint">Language:</span><button id="lang-en" class="seg active">EN</button><button id="lang-id" class="seg">ID</button></div>
+  </div>
+
+  <section>
+    <div id="hint1" class="hint" style="margin-bottom:8px;">How to get RAW TTML JSON (Apple Music web)</div>
+    <ol class="hint" style="margin-top:0; padding-left:18px;">
+      <li id="hint1-list1">Open Apple Music in your browser and play a song.</li>
+      <li id="hint1-list2">Open DevTools → Network (Windows: Ctrl+Shift+I, macOS: Cmd+Option+I).</li>
+      <li id="hint1-list3">In the Network filter, type: <span class="mono">syllable-lyrics</span>.</li>
+      <li id="hint1-list4">Click the latest <span class="mono">syllable-lyrics</span> request.</li>
+      <li id="hint1-list5">Go to the Response tab → Right‑click → Copy → Copy response.</li>
+      <li id="hint1-list6">Save it as a <span class="mono">.json</span> file.</li>
+    </ol>
+    <label id="fileLabel" for="file">JSON/TTML File</label>
+    <input type="file" id="file" accept=".json,.txt,.ttml,.lrc,.xml" />
+    <div class="row" style="margin-top:8px;">
+      <button id="load-file">Load file → editor</button>
+    </div>
+
+    <label id="editorLabel" for="editor" style="margin-top:12px;">Editor</label>
+    <textarea id="editor" placeholder="Paste Apple Music JSON or TTML here..."></textarea>
+    <div class="row" style="margin-top:8px; align-items:center;">
+      <button id="extract" class="primary">Convert & Download .ttml</button>
+      <button id="clear">Clear</button>
+      <label style="display:flex; align-items:center; gap:6px; margin-left:auto;">
+        <input type="checkbox" id="beautify" checked /> <span id="beautifyLabel">Beautify</span>
+      </label>
+    </div>
+    <div class="row" style="margin-top:8px; align-items:center;">
+      <label id="custLabel" style="margin:0;">Custom filename (.ttml):</label>
+      <input type="text" id="customName" placeholder="leave empty for auto" style="flex:1; min-width:240px;" />
+    </div>
+    <div id="status" class="hint" style="margin-top:8px;"></div>
+  </section>
+
+  <section>
+    <div id="hint2" class="hint" style="margin-bottom:8px;">Bookmarklet to auto-capture on <span class="mono">music.apple.com</span> (captures syllable-lyrics when a song plays).</div>
+    <a id="bookmarklet" class="bookmarklet" href="#">Apple Music TTML Helper</a>
+    <div id="hint3" class="hint" style="margin-top:6px;">Drag the button above to your bookmarks bar, then click it on Apple Music.</div>
+  </section>
+
+  <script>
+    const i18n = {
+      en: {
+        title: 'Apple Music TTML Tool - NewSync',
+        language: 'Language',
+        theme: 'Theme',
+        night: 'Night',
+        light: 'Light',
+        hint1: 'How to get RAW ttml/json from Apple Music?',
+        hint1List1: 'Open Apple Music in your browser and play a song and open the lyrics.',
+        hint1List2: 'Open DevTools → Network',
+        hint1List3: 'In the Network filter, type: syllable-lyrics.',
+        hint1List4: 'Click the latest syllable-lyrics request.',
+        hint1List5: 'Go to the Response tab → CTRL + A → Copy',
+        hint1List6: 'Paste to the editor below or save it as a .json file.',
+        fileLabel: 'JSON/TTML File',
+        editor: 'Editor',
+        editorPlaceholder: 'Paste Apple Music JSON or TTML here...',
+        convert: 'Convert & Download .ttml',
+        clear: 'Clear',
+        beautify: 'Beautify',
+        custom: 'Custom filename (.ttml):',
+        customPh: 'leave empty for auto',
+        hint2: 'Bookmarklet to auto-capture on music.apple.com (captures syllable-lyrics when a song plays).',
+        hint3: 'Drag the button above to your bookmarks bar, then click it on Apple Music.',
+        statusEmpty: 'Editor is empty',
+        statusLoaded: 'File loaded into editor.',
+        statusSaved: 'Saved from editor.',
+        statusInvalid: 'Content is not valid JSON/TTML.',
+        statusNoTTML: 'TTML not found in JSON.',
+        success: 'Success: '
+      },
+      id: {
+        title: 'Apple Music TTML Tool - NewSync',
+        language: 'Bahasa',
+        theme: 'Tema',
+        night: 'Gelap',
+        light: 'Terang',
+        hint1: 'Bagaimana cara mendapatkan json/ttml dari Apple Music?',
+        hint1List1: 'Buka Apple Music di browser desktop dan putar lagu dan buka lirik.',
+        hint1List2: 'Buka DevTools → Network',
+        hint1List3: 'Di kolom filter, ketik: syllable-lyrics.',
+        hint1List4: 'Klik permintaan syllable-lyrics terbaru.',
+        hint1List5: 'Pergi ke tab Response → CTRL + A → Salin',
+        hint1List6: 'Tempel ke editor di bawah atau simpan sebagai file .json.',
+        fileLabel: 'File JSON/TTML',
+        editor: 'Editor',
+        editorPlaceholder: 'Tempel JSON Apple Music atau TTML di sini...',
+        convert: 'Konversi & Unduh .ttml',
+        clear: 'Bersihkan',
+        beautify: 'Beautify',
+        custom: 'Nama file kustom (.ttml):',
+        customPh: 'kosongkan untuk otomatis',
+        hint2: 'Bookmarklet untuk auto-capture di music.apple.com (menangkap syllable-lyrics saat lagu diputar).',
+        hint3: 'Tarik tombol di atas ke bookmarks bar, lalu klik di Apple Music.',
+        statusEmpty: 'Editor kosong',
+        statusLoaded: 'File dimuat ke editor.',
+        statusSaved: 'Disimpan dari editor.',
+        statusInvalid: 'Konten bukan JSON/TTML yang valid.',
+        statusNoTTML: 'TTML tidak ditemukan di JSON.',
+        success: 'Berhasil: '
+      }
+    };
+
+    let lang = localStorage.getItem('am_ttml_lang') || 'en';
+
+    function applyLang() {
+      const L = i18n[lang];
+      document.getElementById('title').textContent = L.title;
+      document.getElementById('langLabel').textContent = L.language + ':';
+      document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+      document.getElementById('lang-id').classList.toggle('active', lang === 'id');
+      document.getElementById('hint1').textContent = L.hint1;
+      document.getElementById('hint1-list1').textContent = L.hint1List1;
+      document.getElementById('hint1-list2').textContent = L.hint1List2;
+      document.getElementById('hint1-list3').textContent = L.hint1List3;
+      document.getElementById('hint1-list4').textContent = L.hint1List4;
+      document.getElementById('hint1-list5').textContent = L.hint1List5;
+      document.getElementById('hint1-list6').textContent = L.hint1List6;
+      document.getElementById('fileLabel').textContent = L.fileLabel;
+      document.getElementById('editorLabel').textContent = L.editor;
+      document.getElementById('editor').placeholder = L.editorPlaceholder;
+      document.getElementById('extract').textContent = L.convert;
+      document.getElementById('clear').textContent = L.clear;
+      document.getElementById('beautifyLabel').textContent = L.beautify;
+      document.getElementById('custLabel').textContent = L.custom;
+      document.getElementById('customName').placeholder = L.customPh;
+      document.getElementById('hint2').textContent = L.hint2;
+      document.getElementById('hint3').textContent = L.hint3;
+      // removed interactive toggles
+    }
+
+    function applyTheme() { /* Night only */ }
+    
+    function setStatus(msg, cls = '') {
+      const el = document.getElementById('status');
+      el.textContent = msg;
+      el.className = 'hint ' + cls;
+    }
+    
+
+    function saveFile(content, fileName) {
+      const blob = new Blob([content], { type: 'application/xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function findFirstTTMLString(value) {
+      if (!value) return null;
+      if (typeof value === 'string') {
+        const t = value.trim();
+        if (t.startsWith('<tt ')) return value;
+      }
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          const found = findFirstTTMLString(item);
+          if (found) return found;
+        }
+      } else if (typeof value === 'object') {
+        for (const k of Object.keys(value)) {
+          const found = findFirstTTMLString(value[k]);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
+    function deriveOutputName(json) {
+      try {
+        const data0 = json && json.data && json.data[0];
+        const attrs = data0 && data0.attributes;
+        const pp = attrs && attrs.playParams;
+        const title = (attrs && (attrs.name || attrs.title)) || '';
+        const artist = (attrs && (attrs.artistName || attrs.composerName)) || '';
+        const id = (pp && (pp.id || pp.catalogId)) || (data0 && data0.id) || 'lyrics';
+        const core = [title, artist].filter(Boolean).join(' - ') || id.toString();
+        return core.replace(/[^A-Za-z0-9_\-\s]/g, '_') + '.ttml';
+      } catch (e) {
+        return 'lyrics.ttml';
+      }
+    }
+
+    function prettyPrintXML(xmlString) {
+      try {
+        const blockTags = new Set(['tt','head','metadata','iTunesMetadata','body','div','p','songwriters','transliterations','translations']);
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xmlString, 'application/xml');
+        if (doc.getElementsByTagName('parsererror').length) return xmlString;
+
+        const pieces = [];
+        function esc(text) {
+          return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+        function serialize(node, depth) {
+          const indent = '  '.repeat(depth);
+          if (node.nodeType === 3) {
+            const t = node.nodeValue || '';
+            if (t.trim() === '') return;
+            pieces.push(esc(t));
+            return;
+          }
+          if (node.nodeType !== 1) return;
+          const tag = node.tagName;
+          const attrs = Array.from(node.attributes).map(a => `${a.name}="${a.value}"`).join(' ');
+          const openTag = attrs ? `<${tag} ${attrs}>` : `<${tag}>`;
+          const closeTag = `</${tag}>`;
+          const isBlock = blockTags.has(tag);
+
+          const children = Array.from(node.childNodes);
+          if (isBlock) pieces.push(`\n${indent}${openTag}`);
+          else pieces.push(openTag);
+
+          const hasElemChild = children.some(c => c.nodeType === 1);
+          if (!hasElemChild) {
+            children.forEach(c => serialize(c, depth));
+          } else {
+            children.forEach(c => serialize(c, isBlock ? depth + 1 : depth));
+            if (isBlock) pieces.push(`\n${indent}`);
+          }
+
+          pieces.push(closeTag);
+        }
+        serialize(doc.documentElement, 0);
+        let out = pieces.join('');
+        out = out.replace(/^\n/, '');
+        if (!out.endsWith('\n')) out += '\n';
+        return out;
+      } catch (_) {
+        return xmlString;
+      }
+    }
+
+    function extractFromEditor() {
+      const text = document.getElementById('editor').value || '';
+      if (!text.trim()) {
+        setStatus(i18n[lang].statusEmpty, 'warn');
+        return;
+      }
+      const beautify = document.getElementById('beautify').checked;
+      const customName = (document.getElementById('customName').value || '').trim();
+      // TTML langsung
+      if (text.trim().startsWith('<tt ')) {
+        const output = beautify ? prettyPrintXML(text) : text;
+        const name = customName ? (customName.endsWith('.ttml') ? customName : customName + '.ttml') : 'lyrics.ttml';
+        saveFile(output, name);
+        setStatus(i18n[lang].statusSaved, 'ok');
+        return;
+      }
+      // JSON → TTML
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        setStatus(i18n[lang].statusInvalid, 'error');
+        return;
+      }
+      let ttml = null;
+      try {
+        ttml = json && json.data && json.data[0] && json.data[0].attributes && json.data[0].attributes.ttmlLocalizations;
+      } catch (_) {}
+      if (!ttml) ttml = findFirstTTMLString(json);
+      if (!ttml) {
+        setStatus(i18n[lang].statusNoTTML, 'error');
+        return;
+      }
+      const name = customName ? (customName.endsWith('.ttml') ? customName : customName + '.ttml') : deriveOutputName(json);
+      const output = beautify ? prettyPrintXML(ttml) : ttml;
+      saveFile(output, name);
+      setStatus(i18n[lang].success + name, 'ok');
+    }
+
+    document.getElementById('load-file').addEventListener('click', async () => {
+      const file = document.getElementById('file').files[0];
+      if (!file) { setStatus(lang === 'en' ? 'Select a file first.' : 'Pilih file terlebih dahulu.', 'warn'); return; }
+      const txt = await file.text();
+      document.getElementById('editor').value = txt;
+      setStatus(i18n[lang].statusLoaded, 'ok');
+    });
+    document.getElementById('extract').addEventListener('click', extractFromEditor);
+    document.getElementById('clear').addEventListener('click', () => {
+      document.getElementById('editor').value = '';
+      setStatus('');
+    });
+
+    
+
+    // Bookmarklet: minimal injector (fetch/XHR patch + auto-download)
+    const injector = `(function(){if(window.__am_ttml_helper_active){alert('TTML Helper sudah aktif.');return;}window.__am_ttml_helper_active={names:new Set(),last:''};function s(c,n){const b=new Blob([c],{type:'application/xml;charset=utf-8'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}function f(v){if(!v)return null;if(typeof v==='string'){const t=v.trim();if(t.startsWith('<tt '))return v;}if(Array.isArray(v)){for(const i of v){const r=f(i);if(r)return r;}}else if(typeof v==='object'){for(const k of Object.keys(v)){const r=f(v[k]);if(r)return r;}}return null;}function np(){try{const mk=window.MusicKit&&window.MusicKit.getInstance&&window.MusicKit.getInstance();const it=mk&&mk.nowPlayingItem;const ti=it&&it.title||'';const ar=(it&&it.artistName)||(it&&it.artist&&it.artist.name)||'';if(ti||ar)return{title:ti,artist:ar};}catch(_){ }try{const tEl=document.querySelector('[data-testid=\\"track-title\\"], [aria-label^=\\"Playing\\"] [dir] span, [role=\\"button\\"][data-testid*=\\"track\\"] span');const aEl=document.querySelector('[data-testid=\\"track-subtitle\\"], [aria-label^=\\"Playing\\"] a[href*=\\"/artist/\\"]');const t=(tEl&&tEl.textContent||'').trim();const a=(aEl&&aEl.textContent||'').trim();if(t||a)return{title:t,artist:a};}catch(_){ }try{const dt=(document.title||'').replace(/\\s+\\|\\s*Apple Music.*/i,'').trim();if(dt)return{title:dt,artist:''};}catch(_){ }return null;}function nameOf(j){try{const now=np();if(now&&(now.title||now.artist)){const core=[now.title,now.artist].filter(Boolean).join(' - ');if(core)return core.replace(/[^A-Za-z0-9_\-\s]/g,'_')+'.ttml';}const d=j&&j.data&&j.data[0];const a=d&&d.attributes;const p=a&&a.playParams;const t=(a&&(a.name||a.title))||'';const r=(a&&(a.artistName||a.composerName))||'';const i=(p&&(p.id||p.catalogId))||(d&&d.id)||'lyrics';const core2=[t,r].filter(Boolean).join(' - ')||i.toString();return core2.replace(/[^A-Za-z0-9_\-\s]/g,'_')+'.ttml';}catch(e){return 'lyrics.ttml';}}function H(o){const t=(o&&o.data&&o.data[0]&&o.data[0].attributes&&o.data[0].attributes.ttmlLocalizations)||f(o);if(!t)return;const n=nameOf(o);if(window.__am_ttml_helper_active.last===t||window.__am_ttml_helper_active.names.has(n))return;window.__am_ttml_helper_active.last=t;window.__am_ttml_helper_active.names.add(n);s(t,n);}const of=window.fetch;window.fetch=async function(i){const u=typeof i==='string'?i:(i&&i.url)||'';const r=await of.apply(this,arguments);try{if(/syllable-lyrics|lyrics/i.test(u)){const cl=r.clone();const c=cl.headers.get('content-type')||'';if(c.includes('application/json')){cl.json().then(H).catch(()=>{});}else if(c.includes('text/plain')||c.includes('application/octet-stream')){cl.text().then(t=>{try{H(JSON.parse(t));}catch(_){}}).catch(()=>{});}}}catch(_){ }return r;};const xo=XMLHttpRequest.prototype.open;const xs=XMLHttpRequest.prototype.send;XMLHttpRequest.prototype.open=function(m,u){this.__u=u||'';return xo.apply(this,arguments);};XMLHttpRequest.prototype.send=function(){this.addEventListener('load',function(){try{const u=this.__u||'';if(!/syllable-lyrics|lyrics/i.test(u))return;const c=this.getResponseHeader('content-type')||'';if(c.includes('application/json')){H(JSON.parse(this.responseText));}else if(c.includes('text/plain')||c.includes('application/octet-stream')){try{H(JSON.parse(this.responseText));}catch(_){}}}catch(_){}});return xs.apply(this,arguments);};alert('TTML Helper aktif. Putar lagu untuk menangkap TTML.');})();`;
+    const href = 'javascript:' + encodeURIComponent(injector);
+    const a = document.getElementById('bookmarklet');
+    a.setAttribute('href', href);
+
+    // Language toggles
+    document.getElementById('lang-en').addEventListener('click', () => { lang = 'en'; localStorage.setItem('am_ttml_lang', lang); applyLang(); });
+    document.getElementById('lang-id').addEventListener('click', () => { lang = 'id'; localStorage.setItem('am_ttml_lang', lang); applyLang(); });
+
+    // Initial state (persisted lang, Night theme)
+    if (lang !== 'en' && lang !== 'id') lang = 'en';
+    applyLang();
+    applyTheme();
+  </script>
+</body>
+</html>
+
+

@@ -1,0 +1,28 @@
+body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; color: #eaeaea; background: #111; }
+body.light { background: #fff; color: #222; }
+h1 { font-size: 20px; margin: 0 0 12px; }
+section { border: 1px solid #333; border-radius: 10px; padding: 16px; margin-bottom: 18px; background: #1b1b1b; }
+body.light section { background: #fff; border-color: #ddd; }
+label { display: block; font-weight: 600; margin: 8px 0 6px; }
+textarea { width: 100%; min-height: 180px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+input[type="text"] { width: 100%; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+button { padding: 8px 12px; border-radius: 8px; border: 1px solid #3a3a3a; background: #2a2a2a; color: #eaeaea; cursor: pointer; }
+button.primary { background: #d60017; border-color: #d60017; color: #fff; }
+body.light button { background: #f6f6f6; border-color: #ffffff; color: #222; }
+.hint { color: #9aa0a6; font-size: 12px; }
+body.light .hint { color: #666; }
+.ok { color: #0a7b1f; }
+.warn { color: #b06b00; }
+.error { color: #b00020; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.bookmarklet { display: inline-block; padding: 6px 10px; background: #d60017; color: #ffffff; border-radius: 6px; text-decoration: none; }
+.toolbar { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.toggle-group { display: flex; gap: 8px; align-items: center; }
+.seg { padding: 6px 10px; border-radius: 8px; border: 1px solid #3a3a3a; background: #2a2a2a; color: #eaeaea; cursor: pointer; }
+.seg.active { background: #00000000; border-color: #d60017; color: #fff; }
+body.light .seg { background: #f6f6f6; border-color: #aaa; color: #222; }
+input[type="file"], input[type="text"], textarea { background: #121212; color: #eaeaea; border: 1px solid #333; border-radius: 6px; padding: 6px 8px; }
+body.light input[type="file"], body.light input[type="text"], body.light textarea { background: #fff; color: #222; border-color: #bbb; }
+p { margin: 0; font-size: 14px; }
+
