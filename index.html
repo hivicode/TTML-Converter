@@ -37,9 +37,7 @@
     <div class="row" style="margin-top:8px; align-items:center;">
       <button id="extract" class="primary">Convert & Download .ttml</button>
       <button id="clear">Clear</button>
-      <label style="display:flex; align-items:center; gap:6px; margin-left:auto;">
-        <input type="checkbox" id="beautify" checked /> <span id="beautifyLabel">Beautify</span>
-      </label>
+      
     </div>
     <div id="status" class="hint" style="margin-top:8px;"></div>
   </section>
@@ -138,7 +136,7 @@
       document.getElementById('editor').placeholder = L.editorPlaceholder;
       document.getElementById('extract').textContent = L.convert;
       document.getElementById('clear').textContent = L.clear;
-      document.getElementById('beautifyLabel').textContent = L.beautify;
+      
       document.getElementById('custLabel').textContent = L.custom;
       document.getElementById('customName').placeholder = L.customPh;
       document.getElementById('hint2').textContent = L.hint2;
@@ -202,55 +200,7 @@
       }
     }
 
-    function prettyPrintXML(xmlString) {
-      try {
-        const blockTags = new Set(['tt','head','metadata','iTunesMetadata','body','div','p','songwriters','transliterations','translations']);
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(xmlString, 'application/xml');
-        if (doc.getElementsByTagName('parsererror').length) return xmlString;
-
-        const pieces = [];
-        function esc(text) {
-          return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        }
-        function serialize(node, depth) {
-          const indent = '  '.repeat(depth);
-          if (node.nodeType === 3) {
-            const t = node.nodeValue || '';
-            if (t.trim() === '') return;
-            pieces.push(esc(t));
-            return;
-          }
-          if (node.nodeType !== 1) return;
-          const tag = node.tagName;
-          const attrs = Array.from(node.attributes).map(a => `${a.name}="${a.value}"`).join(' ');
-          const openTag = attrs ? `<${tag} ${attrs}>` : `<${tag}>`;
-          const closeTag = `</${tag}>`;
-          const isBlock = blockTags.has(tag);
-
-          const children = Array.from(node.childNodes);
-          if (isBlock) pieces.push(`\n${indent}${openTag}`);
-          else pieces.push(openTag);
-
-          const hasElemChild = children.some(c => c.nodeType === 1);
-          if (!hasElemChild) {
-            children.forEach(c => serialize(c, depth));
-          } else {
-            children.forEach(c => serialize(c, isBlock ? depth + 1 : depth));
-            if (isBlock) pieces.push(`\n${indent}`);
-          }
-
-          pieces.push(closeTag);
-        }
-        serialize(doc.documentElement, 0);
-        let out = pieces.join('');
-        out = out.replace(/^\n/, '');
-        if (!out.endsWith('\n')) out += '\n';
-        return out;
-      } catch (_) {
-        return xmlString;
-      }
-    }
+    
 
     function extractFromEditor() {
       const text = document.getElementById('editor').value || '';
@@ -258,11 +208,10 @@
         setStatus(i18n[lang].statusEmpty, 'warn');
         return;
       }
-      const beautify = document.getElementById('beautify').checked;
       const customName = (document.getElementById('customName').value || '').trim();
       // TTML langsung
       if (text.trim().startsWith('<tt ')) {
-        const output = beautify ? prettyPrintXML(text) : text;
+        const output = text;
         const name = customName ? (customName.endsWith('.ttml') ? customName : customName + '.ttml') : 'lyrics.ttml';
         saveFile(output, name);
         setStatus(i18n[lang].statusSaved, 'ok');
@@ -286,7 +235,7 @@
         return;
       }
       const name = customName ? (customName.endsWith('.ttml') ? customName : customName + '.ttml') : deriveOutputName(json);
-      const output = beautify ? prettyPrintXML(ttml) : ttml;
+      const output = ttml;
       saveFile(output, name);
       setStatus(i18n[lang].success + name, 'ok');
     }

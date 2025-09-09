@@ -16,7 +16,6 @@
     autoDownload: true,
     lastTTML: null,
     lastMeta: null,
-    beautify: true,
     customName: ''
   };
 
@@ -83,56 +82,7 @@
     }
   }
 
-  function prettyPrintXML(xmlString) {
-    try {
-      const blockTags = new Set(['tt','head','metadata','iTunesMetadata','body','div','p','songwriters','transliterations','translations']);
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(xmlString, 'application/xml');
-      if (doc.getElementsByTagName('parsererror').length) return xmlString;
-
-      const pieces = [];
-      function esc(text) {
-        return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      }
-      function serialize(node, depth) {
-        const indent = '  '.repeat(depth);
-        if (node.nodeType === 3) { // text
-          const t = node.nodeValue || '';
-          if (t.trim() === '') return; // skip pure whitespace
-          pieces.push(esc(t));
-          return;
-        }
-        if (node.nodeType !== 1) return; // elements only
-        const tag = node.tagName;
-        const attrs = Array.from(node.attributes).map(a => `${a.name}="${a.value}"`).join(' ');
-        const openTag = attrs ? `<${tag} ${attrs}>` : `<${tag}>`;
-        const closeTag = `</${tag}>`;
-        const isBlock = blockTags.has(tag);
-
-        const children = Array.from(node.childNodes);
-        if (isBlock) pieces.push(`\n${indent}${openTag}`);
-        else pieces.push(openTag);
-
-        const hasElemChild = children.some(c => c.nodeType === 1);
-        if (!hasElemChild) {
-          // inline content
-          children.forEach(c => serialize(c, depth));
-        } else {
-          children.forEach(c => serialize(c, isBlock ? depth + 1 : depth));
-          if (isBlock) pieces.push(`\n${indent}`);
-        }
-
-        pieces.push(closeTag);
-      }
-      serialize(doc.documentElement, 0);
-      let out = pieces.join('');
-      out = out.replace(/^\n/, '');
-      if (!out.endsWith('\n')) out += '\n';
-      return out;
-    } catch (_) {
-      return xmlString;
-    }
-  }
+  
 
   function extractTTML(json) {
     try {
@@ -166,7 +116,7 @@
   function handleJSON(json) {
     const ttml = extractTTML(json);
     if (!ttml) return;
-    STATE.lastTTML = STATE.beautify ? prettyPrintXML(ttml) : ttml;
+    STATE.lastTTML = ttml;
     STATE.lastMeta = json;
     if (STATE.autoDownload) {
       const defaultName = deriveFileName(json);
@@ -274,8 +224,7 @@
       }
       const defaultName = deriveFileName(STATE.lastMeta || {});
       const name = (STATE.customName && STATE.customName.trim()) ? (STATE.customName.trim().endsWith('.ttml') ? STATE.customName.trim() : STATE.customName.trim() + '.ttml') : defaultName;
-      const content = STATE.beautify ? prettyPrintXML(STATE.lastTTML) : STATE.lastTTML;
-      saveFile(content, name);
+      saveFile(STATE.lastTTML, name);
       flash('TTML diunduh: ' + name);
     });
     btnRow.appendChild(dl);
